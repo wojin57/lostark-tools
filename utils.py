@@ -1,6 +1,5 @@
 from InquirerPy import inquirer
 
-
 def ask_question(message, choices, default):
     answer = inquirer.select(
         message=message,
@@ -12,4 +11,3 @@ def ask_question(message, choices, default):
         return None
     
     return answer
-

@@ -6,7 +6,7 @@ WORKDIR /app
 
 # 필수 라이브러리 설치 (InquirerPy 환경 대응)
 RUN apt-get update && apt-get install -y \
-    locales \
+    git \
     && rm -rf /var/lib/apt/lists/*
 
 # 한글 출력을 위한 환경 변수 설정

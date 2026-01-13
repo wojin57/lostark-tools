@@ -159,3 +159,4 @@ while True:
     else:
         extra = full_avg_cost - no_avg_cost
         print(f"▶ 노숨 전략이 평균 {extra:,.1f}골드 절약!")
+        

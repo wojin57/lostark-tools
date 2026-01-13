@@ -2,4 +2,5 @@ InquirerPy
 requests
 dotenv
 streamlit
+streamlit-cookies-manager
 pandas

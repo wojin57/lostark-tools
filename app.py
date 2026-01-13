@@ -2,8 +2,40 @@ import streamlit as st
 import pandas as pd
 from data.refining_data import refining_data
 from api_client import fetch_all_prices, ITEM_ICONS
+from streamlit_cookies_manager import EncryptedCookieManager
 
-# 1. 페이지 설정 및 디자인 (CSS)
+
+# 1. 쿠키 매니저 초기화
+cookies = EncryptedCookieManager(prefix="lostark-calc/", password="lostark-calc-serka-refining-pw")
+
+if not cookies.ready():
+    st.stop()
+
+# 2. 세션 초기화
+if 'api_key' not in st.session_state:
+    st.session_state.api_key = cookies.get("api_key", "")
+if 'target_eq' not in st.session_state:
+    st.session_state.target_eq = "무기"
+if 'target_lv' not in st.session_state:
+    st.session_state.target_lv = 17
+
+def save_to_cookie(key, value):
+    cookies[key] = str(value)
+    cookies.save()
+
+# API 키 처리를 위한 콜백 함수
+def process_api_key():
+    # 임시 입력창에 값이 있으면 실제 변수에 저장 후 초기화
+    if st.session_state.temp_key:
+        st.session_state.api_key = st.session_state.temp_key
+        save_to_cookie("api_key", st.session_state.api_key)
+        st.session_state.temp_key = "" # 입력창 초기화
+
+def sync_from_main():
+    st.session_state.target_eq = st.session_state.main_eq
+    st.session_state.target_lv = st.session_state.main_lv
+
+# 3. 페이지 설정 및 디자인 (CSS)
 st.set_page_config(page_title="로아 재련 최적화 계산기", layout="wide")
 st.markdown("""
     <style>
@@ -42,7 +74,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# 2. 비즈니스 로직
+# 4. 비즈니스 로직
 def calculate_strategy(p_base, materials_per_try, special_mat_info, use_special=False):
     current_energy, attempt, prob_still_failing, expected_tries = 0.0, 0, 1.0, 0.0
     expected_mats = {k: 0.0 for k in materials_per_try.keys()}
@@ -52,36 +84,30 @@ def calculate_strategy(p_base, materials_per_try, special_mat_info, use_special=
         attempt += 1
         bonus = min((attempt - 1), 10) * 0.1
         p_current = min(p_base * (1 + bonus) + (p_base if use_special and current_energy < 100.0 else 0), 1.0)
-        if current_energy >= 100.0: p_current = 1.0
+        
+        if current_energy >= 100.0:
+            current_energy = 100.0
+            p_current = 1.0
+            prob_still_failing = 0
+
         prob_success_now = prob_still_failing * p_current
         expected_tries += prob_success_now * attempt
+        
         for mat, amount in materials_per_try.items():
             expected_mats[mat] += prob_still_failing * amount
+        
         if use_special and p_current < 1.0: 
             expected_special_mats += prob_still_failing * special_mat_info['count']
-        history.append({"회차": f"{attempt}트", "성공확률": f"{p_current*100:.2f}%", "장기백": f"{current_energy:.2f}%"})
+        
+        history.append({"회차": f"{attempt}트", "성공확률": f"{p_current*100:.2f}%", "장기백": f"{current_energy:.2f}%", "누적 성공률": f"{(1 - prob_still_failing) * 100:.2f}%"})
+        
         if p_current >= 1.0: break
         current_energy += p_current * 46.5
         prob_still_failing *= (1 - p_current)
+    
     max_mats = {k: amount * attempt for k, amount in materials_per_try.items()}
     max_special = special_mat_info['count'] * (attempt - 1) if use_special else 0
     return expected_tries, expected_mats, expected_special_mats, attempt, max_mats, max_special, history
-
-# 3. 세션 및 데이터 로드
-if 'target_eq' not in st.session_state: st.session_state.target_eq = "무기"
-if 'target_lv' not in st.session_state: st.session_state.target_lv = 17
-if 'api_key' not in st.session_state: st.session_state.api_key = ""
-
-# API 키 처리를 위한 콜백 함수
-def process_api_key():
-    # 임시 입력창에 값이 있으면 실제 변수에 저장 후 초기화
-    if st.session_state.temp_key:
-        st.session_state.api_key = st.session_state.temp_key
-        st.session_state.temp_key = "" # 입력창 초기화
-
-def sync_from_main():
-    st.session_state.target_eq = st.session_state.main_eq
-    st.session_state.target_lv = st.session_state.main_lv
 
 data = refining_data[st.session_state.target_eq][st.session_state.target_lv]
 breath_name = data["breath_info"]["name"]
@@ -117,6 +143,8 @@ with st.sidebar:
             placeholder="여기에 키 입력 (입력 후 비워짐)",
             label_visibility="collapsed"
         )
+        if st.session_state.api_key:
+            st.caption("✅ API 키가 쿠키에 저장되었습니다.")
 
     # 실제 API 호출은 저장된 api_key를 사용
     if st.session_state.api_key:
@@ -142,6 +170,7 @@ with st.sidebar:
     for m in fixed_mats:
         # 단위 설정
         step_val = 100000 if m == "운명의 파편" else 10000 if m == "골드" else 100
+
         inventory[m] = st.number_input(f"{m}", min_value=0, value=0, step=step_val, key=f"inv_{m}")
 
 # 7. 비용 계산
