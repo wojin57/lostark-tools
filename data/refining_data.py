@@ -11,7 +11,7 @@ refining_data = {
             },
             "breath_info": {
                 "name": "용암의 숨결",
-                "count": 25,
+                "count": 20,
             }
         }, 
         13: {
@@ -25,7 +25,7 @@ refining_data = {
             },
             "breath_info": {
                 "name": "용암의 숨결",
-                "count": 25,
+                "count": 20,
             }
         }, 
         14: {
@@ -39,7 +39,7 @@ refining_data = {
             },
             "breath_info": {
                 "name": "용암의 숨결",
-                "count": 25,
+                "count": 20,
             }
         }, 
         15: {
@@ -53,7 +53,7 @@ refining_data = {
             },
             "breath_info": {
                 "name": "용암의 숨결",
-                "count": 25,
+                "count": 20,
             }
         }, 
         16: {
@@ -67,7 +67,7 @@ refining_data = {
             },
             "breath_info": {
                 "name": "용암의 숨결",
-                "count": 25,
+                "count": 20,
             }
         }, 
         17: {
@@ -209,7 +209,7 @@ refining_data = {
             },
             "breath_info": {
                 "name": "빙하의 숨결",
-                "count": 25,
+                "count": 20,
             }
         }, 
         13: {
@@ -223,7 +223,7 @@ refining_data = {
             },
             "breath_info": {
                 "name": "빙하의 숨결",
-                "count": 25,
+                "count": 20,
             }
         }, 
         14: {
@@ -237,7 +237,7 @@ refining_data = {
             },
             "breath_info": {
                 "name": "빙하의 숨결",
-                "count": 25,
+                "count": 20,
             }
         }, 
         15: {
@@ -251,7 +251,7 @@ refining_data = {
             },
             "breath_info": {
                 "name": "빙하의 숨결",
-                "count": 25,
+                "count": 20,
             }
         }, 
         16: {
@@ -265,7 +265,7 @@ refining_data = {
             },
             "breath_info": {
                 "name": "빙하의 숨결",
-                "count": 25,
+                "count": 20,
             }
         }, 
         17: {
